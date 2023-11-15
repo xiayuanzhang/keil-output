@@ -21,6 +21,6 @@
 
     "versionEnable": true, //是否启用版本文件, 不启用示例 filename.bin, 启用示例: filename-version.bin
     "binEnable": true,  //是否拷贝bin文件
-    "hexEnable": false,   //是否拷贝hex文件
+    "hexEnable": true,   //是否拷贝hex文件
     "axfEnable": false   //是否拷贝axf文件
 }

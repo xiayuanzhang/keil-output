@@ -1,6 +1,6 @@
 import commentjson
 import re
-import os
+import os, sys
 import shutil
 
 #pyinstaller -w -F --name output main.py
@@ -12,10 +12,18 @@ def load_config(filepath):
 
         config = commentjson.loads(data)
 
+        baseDir = os.path.dirname(filepath)
+
         keilOutputDir = config.get('keilOutputDir')
+        keilOutputDir = os.path.join(baseDir, keilOutputDir)
+
         versionFile = config.get('versionFile')
+        versionFile = os.path.join(baseDir, versionFile)
         versionStr = config.get('versionStr')
+
         outputDir = config.get('outputDir')
+        outputDir = os.path.join(baseDir, outputDir)
+
         removeHistory = config.get('removeHistory')
         versionEnable = config.get('versionEnable')
         binEnable = config.get('binEnable')
@@ -70,11 +78,15 @@ def load_config(filepath):
                     print(f'Copied {os.path.join(keilOutputDir, filename)} to {os.path.join(outputDir, new_filename)}')
 
     except FileNotFoundError:
-        print(f'Error: The file {filepath} does not exist.')
+        print(f'Error: The file [config.json] or [versionFile] does not exist.')
     except KeyError as e:
         print(f'Error: The key {e} does not exist in the JSON file.')
 
 
 
 # 使用函数
-load_config('config.json')
+if __name__ == "__main__":
+    current_path = os.path.dirname(sys.argv[0])
+    config_path = os.path.join(current_path, "config.json")
+    print("config.json dir: ", config_path)
+    load_config(config_path)
