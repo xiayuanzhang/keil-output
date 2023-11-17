@@ -13,5 +13,5 @@
 
 
 #define SOFT_VERSION "1.4.0"
-#define HARD_CERSION "1.0.0"
+#define HARD_VERSION "1.0.0"
 
