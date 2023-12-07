@@ -15,7 +15,7 @@
     "versionFile": "./version.h", //版本文件
     "versionStr": "#define SOFT_VERSION" , //版本文件中的版本号字符串
 
-    "outputDir": "./", //输出路径
+    "outputDir": "./Bin/", //输出路径
 
     "removeHistory": true, //是否删除历史版本
 

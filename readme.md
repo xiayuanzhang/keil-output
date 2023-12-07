@@ -1,3 +1,33 @@
+# 脚本编译说明
+换源方式
+```python
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple 包名 #清华源
+```
+
+安装依赖
+```python
+pip install commentjson
+pip install shutil
+pip install re
+```
+
+打包成exe的工具
+```python
+# 安装工具包
+pip install pyinstaller
+
+#打包指令
+pyinstaller -F -w --icon=chengzi.ico py_word.py
+
+# -w表示屏蔽黑窗口, 如果需要使用到命令行(比如printf输出) 就不能加-w
+# --icon=chengzi.ico, 表示指定图标
+# py_word.py 表示需要打包为exe文件的python脚本
+# --name=NAME 指定输出的exe文件的名称, 加不加.exe都一样
+```
+> 注意指令中的 = 号之间,不能随便添加空格
+
+![Alt text](img\image.png)
+
 # 简介
 
 ### 使用keil自带的fromelf工具可以将axf文件格式化为bin文件.
