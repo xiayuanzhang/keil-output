@@ -1,99 +1,212 @@
-import commentjson
-import re
-import os, sys
+from configparser import ConfigParser, ExtendedInterpolation
+import os
 import shutil
+import sys  # 添加这个导入
 
-#pyinstaller -w -F --name output main.py
 
-def load_config(filepath):
-    try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            data = f.read()
+#获取命令行输入参数
+if len(sys.argv) != 2:
+    print('[output]: error: invalid input arguments. End of execution. ')
+    sys.exit(0)
 
-        config = commentjson.loads(data)
+# 获取起始路径,并替换路径中的 \ 为 /
+config_file = sys.argv[1]
+config_file = config_file.replace('\\', '/')
+if not os.path.isfile(config_file):
+    print('[output]: error: invalid input arguments. End of execution. ')
+    sys.exit(0)
 
-        baseDir = os.path.dirname(filepath)
 
-        keilOutputDir = config.get('keilOutputDir')
-        keilOutputDir = os.path.join(baseDir, keilOutputDir)
-        if not os.path.exists(keilOutputDir):
-            print(f'[Verion Script] Error: The directory [{keilOutputDir}] does not exist.')
-            print('[Verion Script] Stop Run')
-            return
+# 检测配置文件是否存在
+if not os.path.exists(config_file):
+    print('[output]: error: config.ini not found. End of execution. ')
+    sys.exit(0)
 
-        versionFile = config.get('versionFile')
-        versionFile = os.path.join(baseDir, versionFile)
-        versionStr = config.get('versionStr')
+print('[output]: Start, Begin to execute...')
 
-        outputDir = config.get('outputDir')
-        outputDir = os.path.join(baseDir, outputDir)
-        if not os.path.exists(outputDir):
-            os.makedirs(outputDir)
-            print(f'[Verion Script] Created directory [{outputDir}].')
+# 读取配置文件
+config = ConfigParser(interpolation=ExtendedInterpolation())
+config.read(config_file,encoding="utf-8")
 
-        removeHistory = config.get('removeHistory')
-        versionEnable = config.get('versionEnable')
-        binEnable = config.get('binEnable')
-        hexEnable = config.get('hexEnable')
-        axfEnable = config.get('axfEnable')
+config_path = os.path.dirname(config_file) + '/'
+print('[output]: config_file = ', config_file)
 
-        # print(f'[Verion Script] keilOutputDir: {keilOutputDir}')
-        # print(f'[Verion Script] versionFile: {versionFile}')
-        # print(f'[Verion Script] versionStr: {versionStr}')
-        # print(f'[Verion Script] outputDir: {outputDir}')
-        # print(f'[Verion Script] removeHistory: {removeHistory}')
-        # print(f'[Verion Script] versionEnable: {versionEnable}')
-        # print(f'[Verion Script] binEnable: {binEnable}')
-        # print(f'[Verion Script] hexEnable: {hexEnable}')
-        # print(f'[Verion Script] axfEnable: {axfEnable}')
+# 检测配置文件中参数是否存在
+if not config.has_section('D'):
+    print('[output]: error: [D] section not found. End of execution. ')
+    sys.exit(0)
+if not config.has_option('D', 'print_log'):
+    print('[output]: error: print_log not found. End of execution. ')
+    sys.exit(0)
+if not config.has_option('D', 'keil_output_path'):
+    print('[output]: error: keil_output_path not found. End of execution. ')
+    sys.exit(0)
+if not config.has_option('D', 'copy_bin'):
+    print('[output]: error: copy_bin not found. End of execution. ')
+    sys.exit(0)
+if not config.has_option('D', 'copy_hex'):
+    print('[output]: error: copy_hex not found. End of execution. ')
+    sys.exit(0)
+if not config.has_option('D', 'copy_axf'):
+    print('[output]: error: copy_axf not found. End of execution. ')
+    sys.exit(0)
+if not config.has_option('D', 'output_path'):
+    print('[output]: error: output_path not found. End of execution. ')
+    sys.exit(0)
+if not config.has_option('D', 'version_h'):
+    print('[output]: error: version_h not found. End of execution. ')
+    sys.exit(0)
+if not config.has_option('D', 'version_str'):
+    print('[output]: error: version_str not found. End of execution. ')
+    sys.exit(0)
+if not config.has_option('D', 'version_h_encoding'):
+    print('[output]: error: version_h_encoding not found. End of execution. ')
+    sys.exit(0)
+if not config.has_option('D', 'delete_history'):
+    print('[output]: error: delete_history not found. End of execution. ')
+    sys.exit(0)
+if not config.has_option('D', 'append_version'):
+    print('[output]: error: append_version not found. End of execution. ')
+    sys.exit(0)
 
-        with open(versionFile, 'r', encoding='utf-8') as vf:
-            versionData = vf.read()
-        pattern = re.compile(f'{versionStr} "(.*?)"')
-        match = pattern.search(versionData)
-        if match:
-            version = match.group(1)
-            print(f'[Verion Script] version: {version}')
+# 获取配置参数
+print_log = config.getboolean('D', 'print_log')
+keil_output_path = config.get('D', 'keil_output_path')
+copy_bin = config.getboolean('D', 'copy_bin')
+copy_hex = config.getboolean('D', 'copy_hex')
+copy_axf = config.getboolean('D', 'copy_axf')
+output_path = config.get('D', 'output_path')
+version_h = config.get('D', 'version_h')
+version_str = config.get('D', 'version_str')
+version_h_encoding = config.get('D', 'version_h_encoding')
+delete_history = config.getboolean('D', 'delete_history')
+append_version = config.getboolean('D', 'append_version')
+
+if print_log:
+    print('[output]: keil_output_path = ', keil_output_path)
+    print('[output]: copy_bin = ', copy_bin)
+    print('[output]: copy_hex = ', copy_hex)
+    print('[output]: copy_axf = ', copy_axf)
+    print('[output]: output_path = ', output_path)
+    print('[output]: version_h = ', version_h)
+    print('[output]: version_str = ', version_str)
+    print('[output]: version_h_encoding = ', version_h_encoding)
+    print('[output]: delete_history = ', delete_history)
+    print('[output]: append_version = ', append_version)
+
+keil_output_path = config_path + keil_output_path
+output_path = config_path + output_path
+version_h = config_path + version_h
+
+# 检测路径是否存在
+if not os.path.exists(keil_output_path):
+    print('[output]: error: keil_output_path not found. End of execution. ')
+    sys.exit(0)
+#如果version_str = "xxx",则将其转换为version_str = xxx
+if version_str.startswith('"') and version_str.endswith('"'):
+    version_str = version_str[1:-1]
+    print('[output]: version_str = ', version_str)
+
+# 判断output_path是否存在，不存在则创建. 存在并且需要删除历史文件, 则删除其中
+# 后缀为 .bin .hex .axf .lib 的文件
+if not os.path.exists(output_path):
+    os.makedirs(output_path)
+    print('[output]: output_path not found, create it. ')
+else:
+    if delete_history:
+        for root, dirs, files in os.walk(output_path):
+            for file in files:
+                if file.endswith('.bin') or file.endswith('.hex') or file.endswith('.axf') or file.endswith('.lib'):
+                    os.remove(os.path.join(root, file))
+                    print('[output]: delete file: ', os.path.join(root, file))
+#如果append_output为True,则获取output_h中的output_str,并记录下来
+#output_str的格式为: #define output_STR "V1.0.0"
+#或者 #define output_STR                "V1.0.0"
+version_num = ''
+if append_version:
+    if os.path.exists(version_h):
+        with open(version_h, 'r',encoding=version_h_encoding) as f:
+            lines = f.readlines()
+            for line in lines:
+                if version_str in line and '#define' in line:
+                    if print_log:
+                        print('[output]: version_str = ', line)
+                        print('[output]: version_str = ', line.split('"'))
+                    version_num = line.split('"')[1]
+                    break
+        print('[output]: version_num = ', version_num)
+    else:
+        print("[output]: error: version_h = {0} not found. End of execution.".format(version_h))
+        sys.exit(0)
+
+# 拷贝文件: 搜索keil_output_path是否最多只有一个 .bin .hex .axf .lib 文件
+# 如果 copy_bin copy_hex copy_axf 为 True, 则判断
+# 如果不存在该后缀的文件,则跳过,存在则拷贝到output_path
+# 如果存在多个, 则报出该后缀的警告, 并且跳过
+if copy_bin:
+    bin_files = []
+    for root, dirs, files in os.walk(keil_output_path):
+        for file in files:
+            if file.endswith('.bin'):
+                bin_files.append(os.path.join(root, file))
+    if len(bin_files) == 0:
+        print('[output]: warning: no .bin file found. ')
+    elif len(bin_files) == 1:
+        if append_version:
+            filename = os.path.basename(bin_files[0]).split('.')
+            namebuffer = '-' + version_num + '.' + filename[-1]
+            filename.remove(filename[-1])
+            filename = '.'.join(filename) + namebuffer
+            shutil.copy(bin_files[0], output_path + '/' + filename)
+            print('[output]: copy .bin file and append output: ', output_path + '/' + filename)
         else:
-            version = ''
-            print('[Verion Script] No version found.')
+            shutil.copy(bin_files[0], output_path)
+            print('[output]: copy .bin file: ', bin_files[0])
+    else:
+        print('[output]: warning: more than one .bin file found. ')
+if copy_hex:
+    hex_files = []
+    for root, dirs, files in os.walk(keil_output_path):
+        for file in files:
+            if file.endswith('.hex'):
+                hex_files.append(os.path.join(root, file))
+    if len(hex_files) == 0:
+        print('[output]: warning: no .hex file found. ')
+    elif len(hex_files) == 1:
+        if append_version:
+            filename = os.path.basename(hex_files[0]).split('.')
+            namebuffer = '-' + version_num + '.' + filename[-1]
+            filename.remove(filename[-1])
+            filename = '.'.join(filename) + namebuffer
+            shutil.copy(hex_files[0], output_path + '/' + filename)
+            print('[output]: copy .hex file and append output: ', output_path + '/' + filename)
+        else:
+            shutil.copy(hex_files[0], output_path)
+            print('[output]: copy .hex file: ', hex_files[0])
+    else:
+        print('[output]: warning: more than one .hex file found. ')
+if copy_axf:
+    axf_files = []
+    for root, dirs, files in os.walk(keil_output_path):
+        for file in files:
+            if file.endswith('.axf'):
+                axf_files.append(os.path.join(root, file))
+    if len(axf_files) == 0:
+        print('[output]: warning: no .axf file found. ')
+    elif len(axf_files) == 1:
+        if append_version:
+            filename = os.path.basename(axf_files[0]).split('.')
+            namebuffer = '-' + version_num + '.' + filename[-1]
+            filename.remove(filename[-1])
+            filename = '.'.join(filename) + namebuffer
+            shutil.copy(axf_files[0], output_path + '/' + filename)
+            print('[output]: copy .axf file and append output: ', output_path + '/' + filename)
+        else:
+            shutil.copy(axf_files[0], output_path)
+            print('[output]: copy .axf file: ', axf_files[0])
+    else:
+        print('[output]: warning: more than one .axf file found. ')
+        
+print('[output]: Success, End of execution. ')
 
-        # 如果removeHistory为True，删除历史文件
-        if removeHistory:
-            for enable, ext in [(binEnable, 'bin'), (hexEnable, 'hex'), (axfEnable, 'axf')]:
-                if enable:
-                    for filename in os.listdir(outputDir):
-                        if filename.endswith(f'.{ext}'):
-                            os.remove(os.path.join(outputDir, filename))
-                            print(f'[Verion Script] Deleted {os.path.join(outputDir, filename)}')
 
-        # 搜索并复制文件
-        for enable, ext in [(binEnable, 'bin'), (hexEnable, 'hex'), (axfEnable, 'axf')]:
-            if enable:
-                files = [f for f in os.listdir(keilOutputDir) if f.endswith(f'.{ext}')]
-                if len(files) == 0:
-                    print(f'[Verion Script] No .{ext} file found.')
-                elif len(files) > 1:
-                    print(f'[Verion Script] Please ensure there is only one .{ext} file.')
-                else:
-                    filename = files[0]
-                    if versionEnable and version:
-                        new_filename = f'{filename.rsplit(".", 1)[0]}-{version}.{ext}'
-                    else:
-                        new_filename = filename
-                    shutil.copy(os.path.join(keilOutputDir, filename), os.path.join(outputDir, new_filename))
-                    print(f'[Verion Script] Copied {os.path.join(keilOutputDir, filename)} to {os.path.join(outputDir, new_filename)}')
-
-    except FileNotFoundError:
-        print(f'[Verion Script] Error: The file [config.json] or [versionFile] dr [[ohterDir]] does not exist.')
-    except KeyError as e:
-        print(f'[Verion Script] Error: The key {e} does not exist in the JSON file.')
-
-
-
-# 使用函数
-if __name__ == "__main__":
-    current_path = os.path.dirname(sys.argv[0])
-    config_path = os.path.join(current_path, "config.json")
-    print("[Verion Script] config.json dir: ", config_path)
-    load_config(config_path)

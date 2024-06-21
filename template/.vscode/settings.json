@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.c": "c",
+        "rte_components.h": "c",
+        "led.h": "c",
+        "delay.h": "c"
+    }
+}
