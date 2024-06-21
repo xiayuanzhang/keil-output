@@ -7,6 +7,13 @@
 // @L = keil中 target/Output/Name of Executable 中设置的字符
 // #L = keil中 target/Output/Name of Executable 中设置的字符 + .axf 这个文件                 
 
+//实际使用示例
+// 在输出axf文件的路径下, 转换为bin文件
+// fromelf.exe --bin -o "$L@L.bin" "#L"
+// 指定main.py对应生成的可执行文件
+// $P..\Output\version.exe
+
+
 //只能使用相对路径
 //相对路径是output.exe所在路径的相对路径
 {
